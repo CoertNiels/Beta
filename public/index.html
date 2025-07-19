@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Room Chat</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #2f3136;
+      color: #dcddde;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 30px;
+      position: relative;
+    }
+
+    h1, h2 {
+      color: #fff;
+      margin-bottom: 10px;
+    }
+
+    #chat-container {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+    }
+
+    #username-display {
+      margin-bottom: 10px;
+    }
+
+    #room-list, #chat-window {
+      background-color: #36393f;
+      border: 1px solid #202225;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    #room-list {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .room-item {
+      padding: 10px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+
+    .room-item:hover {
+      background-color: #4f545c;
+    }
+
+    .message {
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 4px;
+      background-color: #40444b;
+    }
+
+    .message .username {
+      font-weight: bold;
+      color: #7289da;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    #chat-window-container {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    #chat-window {
+      height: 400px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+    }
+
+    #message-input {
+      width: 75%;
+      padding: 12px;
+      border: none;
+      border-radius: 5px;
+      background-color: #40444b;
+      color: #fff;
+      outline: none;
+      margin-right: 10px;
+    }
+
+    #send-button {
+      padding: 12px 18px;
+      background-color: #5865f2;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    #send-button:hover {
+      background-color: #4752c4;
+    }
+
+    #new-room-name {
+      margin-top: 15px;
+      width: calc(100% - 140px);
+      padding: 10px;
+      border-radius: 5px;
+      border: none;
+      background-color: #40444b;
+      color: #fff;
+      margin-right: 10px;
+      outline: none;
+    }
+
+    #create-room {
+      padding: 10px 14px;
+      background-color: #5865f2;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    #create-room:hover {
+      background-color: #4752c4;
+    }
+
+    /* Clear Cache Button */
+    #clear-cache {
+      position: absolute;
+      top: 30px;
+      right: 30px;
+      padding: 6px 12px;
+      background-color: #ff3b30;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9em;
+    }
+
+    #clear-cache:hover {
+      background-color: #e0352b;
+    }
+
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #2e3338;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #202225;
+    }
+  </style>
+</head>
+<body>
+  <div id="chat-container">
+    <h1>Room Chat</h1>
+    <div id="username-display">Username: <span id="username"></span></div>
+    <button id="clear-cache">Clear Cache</button>
+
+    <div id="room-list">
+      <h2>Rooms</h2>
+      <div id="rooms"></div>
+      <input type="text" id="new-room-name" placeholder="New room name">
+      <button id="create-room">Create Room</button>
+    </div>
+
+    <div id="chat-window-container" style="display: none;">
+      <div id="chat-window"></div>
+      <div style="display: flex; gap: 10px;">
+        <input type="text" id="message-input" placeholder="Type your message...">
+        <button id="send-button">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="client.js"></script>
+</body>
+</html>
