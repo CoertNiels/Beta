@@ -230,9 +230,7 @@ wss.on('connection', (ws) => {
         case 'message':
           handleMessage(ws, data);
           break;
-        case 'clear-cache':
-          handleClearCache(ws, data);
-          break;
+
       }
     } catch (error) {
       console.error('Error parsing WebSocket message:', error);
@@ -315,124 +313,6 @@ const handleJoin = (ws, data) => {
       }));
     }
   );
-};
-
-const handleClearCache = (ws, data) => {
-  const { username } = data;
-  
-  // Check if user is blocked
-  usersDb.get('SELECT is_blocked FROM users WHERE username = ?', [username], (err, row) => {
-    if (err) {
-      ws.send(JSON.stringify({ 
-        type: 'error', 
-        error: 'Clear failed', 
-        details: 'Failed to check user status. Please try again later.' 
-      }));
-      return;
-    }
-    
-    if (row && row.is_blocked) {
-      ws.send(JSON.stringify({ 
-        type: 'error', 
-        error: 'Clear failed', 
-        details: 'This action is not available for blocked users' 
-      }));
-      return;
-    }
-
-    // Start transaction to ensure atomic operation
-    messagesDb.exec('BEGIN TRANSACTION', (err) => {
-      if (err) {
-        ws.send(JSON.stringify({ 
-          type: 'error', 
-          error: 'Clear failed', 
-          details: 'Failed to start cleanup transaction. Please try again later.' 
-        }));
-        return;
-      }
-
-      // Delete user's messages
-      messagesDb.run('DELETE FROM messages WHERE username = ?', [username], (err) => {
-        if (err) {
-          // Rollback on error
-          messagesDb.exec('ROLLBACK', () => {
-            ws.send(JSON.stringify({
-              type: 'error',
-              error: 'Clear failed',
-              details: 'Failed to clear messages. Please try again later.'
-            }));
-          });
-          return;
-        }
-
-        // Delete user's record
-        usersDb.run('DELETE FROM users WHERE username = ?', [username], (err) => {
-          if (err) {
-            // Rollback on error
-            messagesDb.exec('ROLLBACK', () => {
-              ws.send(JSON.stringify({
-                type: 'error',
-                error: 'Clear failed',
-                details: 'Failed to clear user data. Please try again later.'
-              }));
-            });
-            return;
-          }
-
-          // Clear user's rooms (if any)
-          usersDb.run('DELETE FROM rooms WHERE created_by = ?', [username], (err) => {
-            if (err) {
-              console.error('Error clearing user rooms:', err);
-            }
-
-            // Create new user record with reset status
-            usersDb.run('INSERT INTO users (username, block_count, is_blocked) VALUES (?, 0, 0)',
-              [username], (err) => {
-                if (err) {
-                  // Rollback on error
-                  messagesDb.exec('ROLLBACK', () => {
-                    ws.send(JSON.stringify({
-                      type: 'error',
-                      error: 'Clear failed',
-                      details: 'Failed to reset user status. Please try again later.'
-                    }));
-                  });
-                  return;
-                }
-
-                // Commit transaction
-                messagesDb.exec('COMMIT', (err) => {
-                  if (err) {
-                    ws.send(JSON.stringify({
-                      type: 'error',
-                      error: 'Clear failed',
-                      details: 'Failed to complete cleanup. Please try again later.'
-                    }));
-                    return;
-                  }
-
-                  // Broadcast to all clients that this user's messages are cleared
-                  wss.clients.forEach(client => {
-                    if (client.readyState === WebSocket.OPEN) {
-                      client.send(JSON.stringify({
-                        type: 'user-cleared',
-                        username: username
-                      }));
-                    }
-                  });
-
-                  // Send success response
-                  ws.send(JSON.stringify({
-                    type: 'clear-cache',
-                    success: true
-                  }));
-                });
-              });
-          });
-        });
-      });
-    });
-  });
 };
 
 const handleMessage = (ws, data) => {

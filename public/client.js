@@ -69,13 +69,7 @@ function initWebSocket() {
                     alert(data.error);
                 }
                 break;
-            case 'clear-cache':
-                if (data.success) {
-                    alert('Cache cleared successfully!');
-                    // Refresh page to start fresh
-                    location.reload();
-                }
-                break;
+
             case 'register':
                 if (data.success) {
                     document.getElementById('username').textContent = username;
@@ -93,16 +87,7 @@ function initWebSocket() {
                     roomsContainer.appendChild(roomDiv);
                 });
                 break;
-            case 'user-cleared':
-                // Remove all messages from this user
-                const chatWindow = document.getElementById('chat-window');
-                const messages = chatWindow.querySelectorAll('.message');
-                messages.forEach(message => {
-                    if (message.dataset.username === data.username) {
-                        message.remove();
-                    }
-                });
-                break;
+
         }
     };
 
@@ -249,58 +234,19 @@ function addMessageToChat(data) {
     chatWindow.scrollTop = chatWindow.scrollHeight;
 }
 
-// Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
     const username = getUsername();
     document.getElementById('username').textContent = username;
 
-    // Add clear cache button handler
-    document.getElementById('clear-cache').addEventListener('click', () => {
-        // First check if we have a WebSocket connection
-        if (!ws) {
-            alert('Not connected to server');
-            return;
-        }
+    // Initialize WebSocket connection
+    initWebSocket();
 
-        // Send clear cache request to server
-        ws.send(JSON.stringify({
-            type: 'clear-cache',
-            username: username
-        }));
-
-        // Wait for success response before refreshing
-        const checkStatus = setInterval(() => {
-            // Clear localStorage after successful server response
-            localStorage.removeItem('username');
-            
-            // Generate new username
-            username = `anony_${Math.floor(1000 + Math.random() * 9000)}`;
-            document.getElementById('username').textContent = username;
-            
-            // Register new username
-            registerUser(username);
-            
-            // Clear chat window
-            document.getElementById('chat-window').innerHTML = '';
-            currentRoomId = null;
-            document.getElementById('chat-window-container').style.display = 'none';
-            
-            // Clear room list and reload
-            document.getElementById('rooms').innerHTML = '';
-            loadRooms();
-            
-            // Refresh page after successful cache clearing
-            location.reload();
-            
-            clearInterval(checkStatus);
-        }, 1000);
-    });
+    // Load rooms
+    loadRooms();
 
     document.getElementById('create-room').addEventListener('click', createRoom);
     document.getElementById('send-button').addEventListener('click', sendMessage);
     document.getElementById('message-input').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') sendMessage();
     });
-
-    initWebSocket();
 });
