@@ -45,7 +45,6 @@ function initWebSocket() {
         username = getUsername();
         document.getElementById('username').textContent = username;
         registerUser(username);
-        loadRooms();
     };
 
     ws.onmessage = (event) => {
@@ -73,19 +72,12 @@ function initWebSocket() {
             case 'register':
                 if (data.success) {
                     document.getElementById('username').textContent = username;
+                    loadRooms();
                 }
                 break;
             case 'room-list':
                 // Update room list with complete list
-                const roomsContainer = document.getElementById('rooms');
-                roomsContainer.innerHTML = '';
-                data.rooms.forEach(room => {
-                    const roomDiv = document.createElement('div');
-                    roomDiv.className = 'room-item';
-                    roomDiv.onclick = () => joinRoom(room.id);
-                    roomDiv.textContent = room.name;
-                    roomsContainer.appendChild(roomDiv);
-                });
+                displayRooms(data.rooms);
                 break;
 
         }
@@ -118,9 +110,19 @@ async function loadRooms() {
 // Display list of rooms
 function displayRooms(rooms) {
     const roomsDiv = document.getElementById('rooms');
-    roomsDiv.innerHTML = rooms.map(room => 
-        `<div class="room-item" onclick="joinRoom(${room.id})">${room.name}</div>`
-    ).join('');
+    roomsDiv.innerHTML = rooms.map(room => {
+        // Format the creator watermark
+        const watermark = room.created_by ? 
+            `<span class="room-creator">Created by ${room.created_by}</span>` : 
+            '';
+        
+        return `
+            <div class="room-item" onclick="joinRoom(${room.id})">
+                <span class="room-name">${room.name}</span>
+                ${watermark}
+            </div>
+        `;
+    }).join('');
 }
 
 // Join a room
@@ -185,11 +187,11 @@ function sendMessage() {
     // Get current CET time (hour:minute)
     const now = new Date();
     const options = { 
-        timeZone: 'Europe/Berlin',
+        timeZone: 'Europe/Amsterdam',
         hour: '2-digit',
         minute: '2-digit'
     };
-    const time = now.toLocaleString('en-US', options);
+    const time = now.toLocaleString('nl-NL', options);
 
     if (ws) {
         ws.send(JSON.stringify({
@@ -257,9 +259,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize WebSocket connection
     initWebSocket();
-
-    // Load rooms
-    loadRooms();
 
     document.getElementById('create-room').addEventListener('click', createRoom);
     document.getElementById('send-button').addEventListener('click', sendMessage);
