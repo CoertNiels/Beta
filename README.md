@@ -16,7 +16,7 @@ A web-based chat application that allows anonymous users to communicate in publi
 ### Try it Now
 
 You can try the chat application right away at:
-[https://realtimechatroom-9w66.onrender.com/](https://realtimechatroom-9w66.onrender.com/)
+[https://chatroom-ba76.onrender.com](https://chatroom-ba76.onrender.com)
 
 ### For Developers
 
