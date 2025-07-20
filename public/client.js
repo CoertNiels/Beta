@@ -209,7 +209,11 @@ function displayChatHistory(messages) {
     chatWindow.innerHTML = messages.map(msg => {
         // Format timestamp to show only hour and minute
         const timestamp = new Date(msg.timestamp);
-        const options = { hour: '2-digit', minute: '2-digit' };
+        const options = { 
+            hour: '2-digit',
+            minute: '2-digit',
+            timeZone: 'Europe/Berlin'
+        };
         const time = timestamp.toLocaleString('en-US', options);
         
         return `
