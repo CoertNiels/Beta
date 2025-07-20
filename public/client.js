@@ -182,12 +182,22 @@ function sendMessage() {
 
     if (!message || !currentRoomId) return;
 
+    // Get current CET time (hour:minute)
+    const now = new Date();
+    const options = { 
+        timeZone: 'Europe/Berlin',
+        hour: '2-digit',
+        minute: '2-digit'
+    };
+    const time = now.toLocaleString('en-US', options);
+
     if (ws) {
         ws.send(JSON.stringify({
             type: 'message',
             roomId: currentRoomId,
             message: message,
-            username: username
+            username: username,
+            time: time
         }));
         messageInput.value = '';
     }
@@ -196,16 +206,19 @@ function sendMessage() {
 // Display chat history
 function displayChatHistory(messages) {
     const chatWindow = document.getElementById('chat-window');
-    // Sort messages by timestamp in ascending order
-    messages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-    chatWindow.innerHTML = messages.map(msg => `
-        <div class="message">
-            <span class="username">${msg.username}</span>: ${msg.message}
-            <span style="color: #666; font-size: 0.8em;">
-                ${new Date(msg.timestamp).toLocaleTimeString()}
-            </span>
-        </div>
-    `).join('');
+    chatWindow.innerHTML = messages.map(msg => {
+        // Format timestamp to show only hour and minute
+        const timestamp = new Date(msg.timestamp);
+        const options = { hour: '2-digit', minute: '2-digit' };
+        const time = timestamp.toLocaleString('en-US', options);
+        
+        return `
+            <div class="message">
+                <span class="username">${msg.username}</span>: ${msg.message}
+                <span class="timestamp">${time}</span>
+            </div>
+        `;
+    }).join('');
     chatWindow.scrollTop = chatWindow.scrollHeight;
 }
 
@@ -215,22 +228,22 @@ function addMessageToChat(data) {
     if (currentRoomId !== data.room_id) return;
     
     const chatWindow = document.getElementById('chat-window');
+    // Format timestamp to show only hour and minute
+    const timestamp = new Date(data.timestamp);
+    const options = { hour: '2-digit', minute: '2-digit' };
+    const time = timestamp.toLocaleString('en-US', options);
+
     const messageHtml = `
         <div class="message" data-username="${data.username}">
             <span class="username">${data.username}</span>: ${data.message}
-            <span style="color: #666; font-size: 0.8em;">
-                ${new Date(data.timestamp).toLocaleString('en-US', {
-                    timeZone: 'Europe/Berlin',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: false
-                })}
-            </span>
+            <span class="timestamp">${time}</span>
         </div>
     `;
     
     // Add new message at the bottom
+    // Add new message at the bottom
     chatWindow.innerHTML += messageHtml;
+    chatWindow.scrollTop = chatWindow.scrollHeight;
     chatWindow.scrollTop = chatWindow.scrollHeight;
 }
 

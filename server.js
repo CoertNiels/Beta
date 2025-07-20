@@ -292,7 +292,7 @@ const handleJoin = (ws, data) => {
   
   // Load chat history
   messagesDb.all(
-    'SELECT * FROM messages WHERE room_id = ? ORDER BY timestamp DESC LIMIT 50',
+    'SELECT * FROM messages WHERE room_id = ? ORDER BY timestamp ASC LIMIT 50',
     [roomId],
     (err, rows) => {
       if (err) {

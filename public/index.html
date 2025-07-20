@@ -60,13 +60,21 @@
       padding: 10px;
       border-radius: 4px;
       background-color: #40444b;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
     }
 
     .message .username {
       font-weight: bold;
       color: #7289da;
       display: block;
-      margin-bottom: 5px;
+    }
+
+    .message .timestamp {
+      color: #747f8d;
+      font-size: 0.8em;
+      align-self: flex-end;
     }
 
     #chat-window-container {
